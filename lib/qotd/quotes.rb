@@ -23,5 +23,5 @@ module Qotd
       "If you want a vision of the future, imagine a boot stamping on a human face - forever.",
       "All the war-propaganda, all the screaming and lies and hatred, comes invariably from people who are not fighting."
     ]
-  }
+  }.freeze
 end

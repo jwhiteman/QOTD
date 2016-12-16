@@ -12,10 +12,18 @@ MAX quote length: 512 bytes
 
 
 ## Server
-"OK\r\n"
+"OK quote\r\n"
 "<quote>"
 "DONE\r\n"
 
-or
+"OK version\r\n
+"<version>"
+"DONE\r\n"
+
+"OK authors\r\n"
+"<author-1>\n"
+"<author-2>\n"
+"<author-3>\n"
+"DONE\r\n"
 
 "FAIL\r\n"

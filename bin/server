@@ -1,0 +1,6 @@
+#!/usr/bin/env ruby
+
+require "bundler/setup"
+require "qotd"
+
+Qotd.start(config: Qotd::CONFIG)

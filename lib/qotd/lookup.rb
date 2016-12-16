@@ -14,6 +14,10 @@ module Qotd
       end
     end
 
+    def authors
+      quotes.keys
+    end
+
     def _number_of_quotes
       quotes.length
     end

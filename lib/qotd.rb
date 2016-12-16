@@ -1,5 +1,5 @@
 require "qotd/version"
+require "qotd/quotes"
 
 module Qotd
-  # Your code goes here...
 end

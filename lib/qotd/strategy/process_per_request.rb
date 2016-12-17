@@ -1,5 +1,6 @@
 module Qotd
   module Strategy
+    # TODO: add limiting
     class ProcessPerRequest
       attr_reader :socket, :config
 

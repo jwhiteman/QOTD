@@ -1,5 +1,6 @@
 module Qotd
   module Strategy
+    # TODO: add limiting
     class ThreadPerRequest
       attr_reader :socket, :config
 

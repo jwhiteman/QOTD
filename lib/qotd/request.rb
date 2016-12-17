@@ -5,12 +5,12 @@ module Qotd
     COMMANDS  = %w(GET).freeze
     RESOURCES = %w(authors version quote).freeze
 
-    def initialize(request: request)
+    def initialize(request)
       @request = request.chomp
     end
 
-    def self.process(request: request)
-      new(request: request).process
+    def self.process(request)
+      new(request).process
     end
 
     def process

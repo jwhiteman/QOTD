@@ -6,9 +6,10 @@ def config_dummy
 end
 
 describe Qotd do
-  let(:client) do
-    Qotd::Client
-  end
+  let(:client) { Qotd::Client }
+  let(:linus_quotes) { Qotd::QUOTES[:linus] }
+  let(:authors) { Qotd::Lookup.authors.join(",") }
+  let(:version) { "QOTD SERVER VERSION #{Qotd::VERSION}" }
 
   describe "serial strategy" do
     def config
@@ -32,21 +33,28 @@ describe Qotd do
       response = client.make_request(request:  "GET quote linus\r\n")
 
       expect(response.header).to eq("OK: quote linus")
-      expect(Qotd::QUOTES[:linus]).to include(response.body)
+      expect(linus_quotes).to include(response.body)
     end
 
     it "serves author requests" do
       response = client.make_request(request:  "GET authors\r\n")
 
       expect(response.header).to eq("OK: authors")
-      expect(response.body).to eq(Qotd::Lookup.authors.join(","))
+      expect(response.body).to eq(authors)
     end
 
     it "serves version requests" do
       response = client.make_request(request:  "GET version\r\n")
-      
+
       expect(response.header).to eq("OK: version")
-      expect(response.body).to eq("QOTD SERVER VERSION 0.1.0")
+      expect(response.body).to eq(version)
+    end
+
+    it "returns an error response for invalid requests" do
+      response = client.make_request(request:  "GET flimflam\r\n")
+
+      expect(response.header).to eq("FAIL: INVALID REQUEST")
+      expect(response.body).to be_nil
     end
   end
 end

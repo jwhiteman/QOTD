@@ -31,7 +31,7 @@ module Qotd
       end
 
       def process(request)
-        Qotd::Request.process(request: request)
+        Qotd::Request.process(request)
       end
     end
   end

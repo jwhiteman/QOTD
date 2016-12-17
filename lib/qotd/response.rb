@@ -2,8 +2,10 @@ module Qotd
   class Response
     attr_reader :command, :resource, :resource_id
 
-    HEADER = "OK: %s\r\n".freeze
-    ERROR  = "FAIL: %s\r\n".freeze
+    CRLF    = "\r\n"
+    HEADER  = "OK: %s"
+    ERROR   = "FAIL: %s"
+    VRESP   = "QOTD SERVER VERSION %s"
 
     def initialize(command: command, resource: resource, resource_id: resource_id)
       @command     = command
@@ -16,7 +18,11 @@ module Qotd
     end
 
     def self.error_response(reason)
-      ERROR % reason
+      close(ERROR % reason)
+    end
+
+    def self.close(msg)
+      [msg, CRLF].join
     end
 
     def create
@@ -29,7 +35,7 @@ module Qotd
     end
 
     def header(resource, resource_id)
-      HEADER % [resource, resource_id].compact.join(" ")
+      close(_header(resource, resource_id))
     end
 
     def body(resource, resource_id)
@@ -43,19 +49,39 @@ module Qotd
     end
 
     def authors
-      Qotd::Lookup.authors.join(",") << "\r\n"
+      close(_authors)
     end
 
     def version
-      "QOTD SERVER VERSION #{Qotd::VERSION}\r\n"
+      close(_version)
     end
 
     def quote
-      (Qotd::Lookup.quote_of_the_day(author_id: resource_id) << "\r\n")
+      close(_quote)
     end
 
     def error_response(reason)
       self.class.error_response(reason)
+    end
+
+    def close(msg)
+      self.class.close(msg)
+    end
+
+    def _quote
+      Qotd::Lookup.quote_of_the_day(author_id: resource_id)
+    end
+
+    def _authors
+      Qotd::Lookup.authors.join(",")
+    end
+
+    def _version
+      VRESP % Qotd::VERSION
+    end
+
+    def _header(resource, resource_id)
+      HEADER % [resource, resource_id].compact.join(" ")
     end
   end
 end

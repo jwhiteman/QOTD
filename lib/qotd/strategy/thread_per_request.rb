@@ -1,6 +1,6 @@
 module Qotd
   module Strategy
-    class ProcessPerRequest
+    class ThreadPerRequest
       attr_reader :socket, :config
 
       def initialize(socket: socket, config: config)
@@ -18,7 +18,7 @@ module Qotd
         loop do
           connection, _ = socket.accept
 
-          worker = fork do
+          worker = Thread.new do
             begin
               loop do
                 request  = connection.readpartial(config.chunk)
@@ -30,9 +30,6 @@ module Qotd
               connection.close
             end
           end
-
-          connection.close
-          Process.detach(worker)
         end
       end
 

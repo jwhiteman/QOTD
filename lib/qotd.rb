@@ -2,7 +2,7 @@ require "socket"
 require "qotd/version"
 require "qotd/quotes"
 require "qotd/lookup"
-require "qotd/serial"
+require "qotd/strategy"
 require "qotd/config"
 
 module Qotd

@@ -47,17 +47,15 @@ module Qotd
           loop do
             connection, _ = socket.accept
 
-            worker = fork do
-              begin
-                loop do
-                  request  = connection.readpartial(config.chunk)
-                  response = process(request)
-                  connection.write(response)
-                end
-              rescue EOFError
-              ensure
-                connection.close
+            begin
+              loop do
+                request  = connection.readpartial(config.chunk)
+                response = process(request)
+                connection.write(response)
               end
+            rescue EOFError
+            ensure
+              connection.close
             end
           end
         end

@@ -35,13 +35,46 @@ ensure
   Process.kill(:INT, server)
 end
 
-$results = Hash.new(0)
+$serial = Hash.new(0)
 while !queue.empty? do
   v = queue.pop
-  $results.store(v, $results[v]+1)
+  $serial.store(v, $serial[v]+1)
 end
 
-def r; $results; end
+begin
+  config          = Qotd::CONFIG.dup
+  config.strategy = Qotd::Strategy::Prefork
+  config.verbose  = true
+  queue           = Queue.new
+
+  config.num_processes = 4
+
+  server = fork do
+    Qotd.start(config: config)
+  end
+
+  Benchmark.bmbm do |bm|
+    bm.report("serial") do
+      (1..NUM_CLIENTS).map do |n|
+        Thread.new do
+          Qotd::Client.make_requests(
+            config: config,
+            request: "GET quote linus\r\n",
+            num_requests: NUM_REQUESTS
+          ) { |response| queue.push(response) }
+        end
+      end.each(&:join)
+    end
+  end
+ensure
+  Process.kill(:INT, server)
+end
+
+$prefork = Hash.new(0)
+while !queue.empty? do
+  v = queue.pop
+  $prefork.store(v, $prefork[v]+1)
+end
 
 require "irb"
 IRB.start

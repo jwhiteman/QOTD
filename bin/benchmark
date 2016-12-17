@@ -1,0 +1,47 @@
+#!/usr/bin/env ruby
+
+require "benchmark"
+require "bundler/setup"
+require "qotd"
+require "qotd/client"
+
+NUM_CLIENTS  = 100
+NUM_REQUESTS = 10
+
+begin
+  config          = Qotd::CONFIG.dup
+  config.strategy = Qotd::Strategy::Serial
+  config.verbose  = true
+  queue           = Queue.new
+
+  server = fork do
+    Qotd.start(config: config)
+  end
+
+  Benchmark.bmbm do |bm|
+    bm.report("serial") do
+      (1..NUM_CLIENTS).map do |n|
+        Thread.new do
+          Qotd::Client.make_requests(
+            config: config,
+            request: "GET quote linus\r\n",
+            num_requests: NUM_REQUESTS
+          ) { |response| queue.push(response) }
+        end
+      end.each(&:join)
+    end
+  end
+ensure
+  Process.kill(:INT, server)
+end
+
+$results = Hash.new(0)
+while !queue.empty? do
+  v = queue.pop
+  $results.store(v, $results[v]+1)
+end
+
+def r; $results; end
+
+require "irb"
+IRB.start

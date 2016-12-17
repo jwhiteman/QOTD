@@ -10,7 +10,7 @@ module Qotd
       begin
         quotes[author_id.to_sym][_index_for_today]
       rescue
-        raise "bad author id"
+        raise "INVALID AUTHOR ID"
       end
     end
 
@@ -31,4 +31,3 @@ module Qotd
     end
   end
 end
-

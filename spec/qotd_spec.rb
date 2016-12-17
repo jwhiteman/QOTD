@@ -50,10 +50,17 @@ describe Qotd do
       expect(response.body).to eq(version)
     end
 
-    it "returns an error response for invalid requests" do
-      response = client.make_request(request:  "GET flimflam\r\n")
+    it "returns an error response for invalid resource requests" do
+      response = client.make_request(request:  "FLOOZ flimflam\r\n")
 
       expect(response.header).to eq("FAIL: INVALID REQUEST")
+      expect(response.body).to be_nil
+    end
+
+    it "returns an error response for invalid resource requests" do
+      response = client.make_request(request:  "GET quote johndoe\r\n")
+
+      expect(response.header).to eq("FAIL: INVALID AUTHOR ID")
       expect(response.body).to be_nil
     end
   end

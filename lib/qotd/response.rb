@@ -7,14 +7,17 @@ module Qotd
     ERROR   = "FAIL: %s"
     VRESP   = "QOTD SERVER VERSION %s"
 
-    def initialize(command: command, resource: resource, resource_id: resource_id)
+    def initialize(command: command, resource: resource,
+                   resource_id: resource_id)
       @command     = command
       @resource    = resource
       @resource_id = resource_id
     end
 
-    def self.create(command: command, resource: resource, resource_id: resource_id)
-      new(command: command, resource: resource, resource_id: resource_id).create
+    def self.create(command: command, resource: resource,
+                    resource_id: resource_id)
+      new(command: command, resource: resource,
+          resource_id: resource_id).create
     end
 
     def self.error_response(reason)

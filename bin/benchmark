@@ -8,6 +8,9 @@ require "qotd/client"
 NUM_CLIENTS  = 100
 NUM_REQUESTS = 10
 
+# TODO: all of results seem unreasonably slow
+# TODO: reduce the numbers and verify with tcpdump
+
 begin
   config          = Qotd::CONFIG.dup
   config.strategy = Qotd::Strategy::Serial
@@ -18,7 +21,7 @@ begin
     Qotd.start(config: config)
   end
 
-  Benchmark.bmbm do |bm|
+  Benchmark.bm do |bm|
     bm.report("serial") do
       (1..NUM_CLIENTS).map do |n|
         Thread.new do
@@ -47,13 +50,13 @@ begin
   config.verbose  = false
   queue           = Queue.new
 
-  config.num_processes = 4
+  config.num_processes = 12
 
   server = fork do
     Qotd.start(config: config)
   end
 
-  Benchmark.bmbm do |bm|
+  Benchmark.bm do |bm|
     bm.report("prefork") do
       (1..NUM_CLIENTS).map do |n|
         Thread.new do

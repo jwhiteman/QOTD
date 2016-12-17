@@ -2,11 +2,13 @@ require "ostruct"
 
 module Qotd
   CONFIG = OpenStruct.new({
-    strategy:     Qotd::Strategy::Serial,
-    port:         10017,
-    host:         "127.0.0.1",
-    lqueue:       5,
-    chunk:        512,
-    verbose:      true
+    strategy:      Qotd::Strategy::Serial,
+    port:          10017,
+    host:          "127.0.0.1",
+    lqueue:        5,
+    chunk:         512,
+    verbose:       true,
+    num_processes: 0,
+    num_threads:   0
   }).freeze
 end

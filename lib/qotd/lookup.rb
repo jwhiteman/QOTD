@@ -8,14 +8,14 @@ module Qotd
 
     def quote_of_the_day(author_id: author_id)
       begin
-        quotes[author_id][_index_for_today]
+        quotes[author_id.to_sym][_index_for_today]
       rescue
-        false
+        raise "bad author id"
       end
     end
 
     def authors
-      quotes.keys
+      quotes.keys.sort
     end
 
     def _number_of_quotes

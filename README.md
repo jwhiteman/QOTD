@@ -27,3 +27,4 @@ MAX quote length: 512 bytes
 "DONE\r\n"
 
 "FAIL\r\n"
+"DONE\r\n"

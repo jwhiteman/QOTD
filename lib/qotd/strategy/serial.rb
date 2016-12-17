@@ -1,42 +1,37 @@
 module Qotd
   module Strategy
     class Serial
-      attr_reader :socket
+      attr_reader :socket, :config
 
-      def initialize(socket: socket)
+      def initialize(socket: socket, config: config)
         @socket = socket
+        @config = config
       end
 
-      def self.run(socket)
-        new(socket: socket).run
+      def self.run(socket: socket, config: config)
+        new(socket: socket, config: config).run
       end
 
       def run
-        trap(:INT) do
-          puts "shutting down #{$$}..."
-
-          exit
-        end
+        trap(:INT) { exit }
 
         loop do
           connection, _ = socket.accept
-
-          print "new client: #{connection}\n"
-
           loop do
             begin
-              request = connection.readpartial(1024)
-
-              print "  request received: #{request}\n"
-
-              connection.write("<some response: #{rand 1000}>")
+              request  = connection.readpartial(config.chunk)
+              response = process(request)
+              connection.write(response)
             rescue EOFError => e
-              print "closing client: #{connection}\n"
               connection.close
               break
             end
           end
         end
+      end
+
+      def process(request)
+        Qotd::Request.process(request: request)
       end
     end
   end

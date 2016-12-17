@@ -11,7 +11,7 @@ NUM_REQUESTS = 10
 begin
   config          = Qotd::CONFIG.dup
   config.strategy = Qotd::Strategy::Serial
-  config.verbose  = true
+  config.verbose  = false
   queue           = Queue.new
 
   server = fork do
@@ -44,7 +44,7 @@ end
 begin
   config          = Qotd::CONFIG.dup
   config.strategy = Qotd::Strategy::Prefork
-  config.verbose  = true
+  config.verbose  = false
   queue           = Queue.new
 
   config.num_processes = 4
@@ -54,7 +54,7 @@ begin
   end
 
   Benchmark.bmbm do |bm|
-    bm.report("serial") do
+    bm.report("prefork") do
       (1..NUM_CLIENTS).map do |n|
         Thread.new do
           Qotd::Client.make_requests(

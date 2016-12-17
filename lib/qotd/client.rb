@@ -29,7 +29,6 @@ module Qotd
       yield "ECONNRESET" if block_given?
       socket.close
 
-      sleep 0.05
       retry
     rescue Errno::EPIPE
       yield "EPIPE" if block_given?

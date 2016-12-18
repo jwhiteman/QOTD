@@ -45,6 +45,10 @@ module Qotd
       socket.close
 
       retry
+    rescue Errno::ENOTCONN
+      puts "Client could not connect. Shutting down"
+
+      exit
     ensure
       socket.close rescue nil
     end

@@ -16,6 +16,10 @@ module Qotd
       end
 
       def run
+        unless config.num_processes > 0
+          raise "ERROR: num_processes must be greater than zero"
+        end
+
         trap(:INT) do
           if $$ == master
             workers.each do |worker|
@@ -34,11 +38,12 @@ module Qotd
         end
 
         loop do
-          dead_worker_pid = Process.wait
-
-          workers.delete(dead_worker_pid)
-
-          workers << spawn_worker(socket)
+          begin
+            dead_worker_pid = Process.wait
+            workers.delete(dead_worker_pid)
+            workers << spawn_worker(socket)
+          rescue Errno::ECHILD
+          end
         end
       end
 

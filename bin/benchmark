@@ -1,90 +1,103 @@
 #!/usr/bin/env ruby
 
 require "benchmark"
+require "ostruct"
+require "optparse"
 require "bundler/setup"
 require "qotd"
 require "qotd/client"
 
-NUM_CLIENTS   = ARGV[0] ? ARGV[0].to_i : 10
-NUM_REQUESTS  = ARGV[1] ? ARGV[1].to_i : 10
-NUM_PROCESSES = ARGV[2] ? ARGV[2].to_i : 12
+options = OpenStruct.new
 
-puts "running benchmark with #{NUM_CLIENTS} clients, " \
-     "#{NUM_REQUESTS} requests per client, " \
-     "and #{NUM_PROCESSES} processes"
+# TODO: make options required
+OptionParser.new do |opts|
+  opts.banner = "Usage: bin/benchmark [options]"
 
-# TODO: all of results seem unreasonably slow
-# TODO: reduce the numbers and verify with tcpdump
-
-begin
-  config          = Qotd::CONFIG.dup
-  config.strategy = Qotd::Strategy::Serial
-  config.verbose  = false
-  queue           = Queue.new
-
-  server = fork do
-    Qotd.start(config: config)
+  opts.on("-c", "--clients CLIENTS", "Number of clients") do |clients|
+    options.clients = clients.to_i
   end
 
-  Benchmark.bm do |bm|
-    bm.report("serial") do
+  opts.on("-r", "--requests REQUESTS", "Number of requests") do |requests|
+    options.requests = requests.to_i
+  end
+
+  opts.on("-p", "--processes PROCESSES", "Number of processes") do |processes|
+    options.processes = processes.to_i
+  end
+
+  opts.on("-v", "--verbose", "Use verbose output") do |_verbose|
+    options.verbose = true
+  end
+
+  opts.on("-h", "--help", "Prints this help") do
+    puts opts
+
+    exit
+  end
+end.parse!
+
+NUM_CLIENTS   = options.clients   || 10
+NUM_REQUESTS  = options.requests  || 1
+NUM_PROCESSES = options.processes || 2
+VERBOSE       = options.verbose   || false
+
+def bm(strategy)
+  begin
+    config          = yield(Qotd::CONFIG.dup)
+    queue           = Queue.new
+
+    server = fork do
+      Qotd.start(config: config)
+    end
+
+    result =  Benchmark.realtime do
       (1..NUM_CLIENTS).map do |n|
         Thread.new do
           Qotd::Client.make_requests(
             config: config,
             request: "GET quote linus\r\n",
             num_requests: NUM_REQUESTS
-          ) { |response| queue.push(response) }
+          ) { |response| queue.push(response) if VERBOSE }
         end
       end.each(&:join)
     end
-  end
-ensure
-  Process.kill(:INT, server)
-end
-
-$serial = Hash.new(0)
-while !queue.empty? do
-  v = queue.pop
-  $serial.store(v, $serial[v]+1)
-end
-
-begin
-  config          = Qotd::CONFIG.dup
-  config.strategy = Qotd::Strategy::Prefork
-  config.verbose  = false
-  queue           = Queue.new
-
-  config.num_processes = NUM_PROCESSES
-
-  server = fork do
-    Qotd.start(config: config)
+  ensure
+    Process.kill(:INT, server)
   end
 
-  Benchmark.bm do |bm|
-    bm.report("prefork") do
-      (1..NUM_CLIENTS).map do |n|
-        Thread.new do
-          Qotd::Client.make_requests(
-            config: config,
-            request: "GET quote linus\r\n",
-            num_requests: NUM_REQUESTS
-          ) { |response| queue.push(response) }
-        end
-      end.each(&:join)
+  puts "#{strategy}: #{result}"
+
+  if VERBOSE
+    results = Hash.new(0)
+
+    while !queue.empty? do
+      v = queue.pop
+      results.store(v, results[v]+1)
+    end
+
+    results.each do |k, v|
+      puts "   #{k.split.first[0..30]}: #{v}"
     end
   end
-ensure
-  Process.kill(:INT, server)
 end
 
-$prefork = Hash.new(0)
-while !queue.empty? do
-  v = queue.pop
-  $prefork.store(v, $prefork[v]+1)
+puts "Running benchmark with #{NUM_CLIENTS} clients, " \
+  "#{NUM_REQUESTS} requests per client, " \
+  "and #{NUM_PROCESSES} processes\n"
+
+bm(Qotd::Strategy::Serial) do |config|
+  config.tap do |config|
+    config.strategy = Qotd::Strategy::Serial
+    config.verbose  = false
+  end
 end
 
-puts "serial: #{$serial.inspect}"
-puts "prefork: #{$prefork.inspect}"
+bm(Qotd::Strategy::Prefork) do |config|
+  config.tap do |config|
+    config.strategy     = Qotd::Strategy::Prefork
+    config.verbose      = false
+    config.num_processes = NUM_PROCESSES
+  end
+end
 
 exit

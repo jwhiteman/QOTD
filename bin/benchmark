@@ -9,7 +9,6 @@ require "qotd/client"
 
 options = OpenStruct.new
 
-# TODO: make options required
 OptionParser.new do |opts|
   opts.banner = "Usage: bin/benchmark [options]"
 

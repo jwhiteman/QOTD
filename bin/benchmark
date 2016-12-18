@@ -64,7 +64,7 @@ def bm(strategy)
     Process.kill(:INT, server)
   end
 
-  puts "#{strategy}: #{result}"
+  puts "  #{strategy}: #{result}"
 
   if VERBOSE
     results = Hash.new(0)

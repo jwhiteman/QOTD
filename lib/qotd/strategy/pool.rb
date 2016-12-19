@@ -15,9 +15,8 @@ module Qotd
       end
 
       def run
+        # TODO: not sure if this helps or not
         trap(:INT) do
-          puts "interrupt received..."
-
           workers.list.each(&:kill)
         end
 

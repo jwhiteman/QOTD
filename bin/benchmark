@@ -42,7 +42,7 @@ end.parse!
 NUM_CLIENTS   = options.clients   || 10
 NUM_REQUESTS  = options.requests  || 1
 NUM_PROCESSES = options.processes || 2
-NUM_THREADS   = options.processes || 10
+NUM_THREADS   = options.threads   || 10
 VERBOSE       = options.verbose   || false
 
 def bm(strategy)

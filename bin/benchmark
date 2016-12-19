@@ -20,8 +20,12 @@ OptionParser.new do |opts|
     options.requests = requests.to_i
   end
 
-  opts.on("-p", "--processes PROCESSES", "Number of processes") do |processes|
+  opts.on("-p", "--processes PROCESSES", "Number of processes (Prefork only)") do |processes|
     options.processes = processes.to_i
+  end
+
+  opts.on("-t", "--threads THREADS", "Number of threads (Thread Pool only)") do |threads|
+    options.threads = threads.to_i
   end
 
   opts.on("-v", "--verbose", "Use verbose output") do |_verbose|
@@ -38,6 +42,7 @@ end.parse!
 NUM_CLIENTS   = options.clients   || 10
 NUM_REQUESTS  = options.requests  || 1
 NUM_PROCESSES = options.processes || 2
+NUM_THREADS   = options.processes || 10
 VERBOSE       = options.verbose   || false
 
 def bm(strategy)
@@ -82,20 +87,32 @@ end
 
 puts "Running benchmark with #{NUM_CLIENTS} clients, " \
   "#{NUM_REQUESTS} requests per client, " \
-  "and #{NUM_PROCESSES} processes\n"
+  "#{NUM_PROCESSES} processes (prefork), " \
+  "and #{NUM_THREADS} (pool)\n"
 
 bm(Qotd::Strategy::Serial) do |config|
   config.tap do |config|
     config.strategy = Qotd::Strategy::Serial
     config.verbose  = false
+    config.port     = 10017
   end
 end
 
 bm(Qotd::Strategy::Prefork) do |config|
   config.tap do |config|
-    config.strategy     = Qotd::Strategy::Prefork
-    config.verbose      = false
+    config.strategy      = Qotd::Strategy::Prefork
+    config.verbose       = false
     config.num_processes = NUM_PROCESSES
+    config.port          = 10018
+  end
+end
+
+bm(Qotd::Strategy::Pool) do |config|
+  config.tap do |config|
+    config.strategy      = Qotd::Strategy::Pool
+    config.verbose       = false
+    config.num_threads   = NUM_THREADS
+    config.port          = 10019
   end
 end
 

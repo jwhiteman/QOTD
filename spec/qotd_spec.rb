@@ -91,4 +91,14 @@ describe Qotd do
       config.num_processes = 4
     end
   end
+
+  test_strategy(Qotd::Strategy::Pool) do |strategy, config|
+    config.tap do |config|
+      config.strategy = strategy
+      config.verbose  = false
+      config.port     = 10021
+
+      config.num_threads = 10
+    end
+  end
 end

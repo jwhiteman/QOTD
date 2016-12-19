@@ -15,7 +15,11 @@ module Qotd
       end
 
       def run
-        trap(:INT) { exit }
+        trap(:INT) do
+          puts "interrupt received..."
+
+          workers.list.each(&:kill)
+        end
 
         Thread.abort_on_exception = true
 

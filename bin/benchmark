@@ -85,10 +85,9 @@ def bm(strategy)
   end
 end
 
-puts "Running benchmark with #{NUM_CLIENTS} clients, " \
-  "#{NUM_REQUESTS} requests per client, " \
+puts "Running benchmark with #{NUM_CLIENTS} clients, " \ "#{NUM_REQUESTS} requests per client, " \
   "#{NUM_PROCESSES} processes (prefork), " \
-  "and #{NUM_THREADS} (pool)\n"
+  "and #{NUM_THREADS} (pool) [PID: #{$$}]\n"
 
 bm(Qotd::Strategy::Serial) do |config|
   config.tap do |config|

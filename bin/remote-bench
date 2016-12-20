@@ -1,0 +1,74 @@
+#!/usr/bin/env ruby
+
+require "benchmark"
+require "ostruct"
+require "optparse"
+require "bundler/setup"
+require "qotd"
+require "qotd/client"
+
+config = Qotd::CONFIG.dup
+
+OptionParser.new do |opts|
+  opts.banner = "Usage: bin/benchmark [config]"
+
+  opts.on("-c", "--clients CLIENTS", "Number of clients") do |clients|
+    config.clients = clients.to_i
+  end
+
+  opts.on("-r", "--requests REQUESTS", "Number of requests") do |requests|
+    config.requests = requests.to_i
+  end
+
+  opts.on("-h", "--host HOST", "host") do |host|
+    config.host = host
+  end
+
+  opts.on("-p", "--port PORT", "port") do |port|
+    config.port = port
+  end
+end.parse!
+
+NUM_CLIENTS   = config.clients    || 10
+NUM_REQUESTS  = config.requests   || 10
+VERBOSE       = true
+
+def bm(config)
+  begin
+    queue  = Queue.new
+
+    result =  Benchmark.realtime do
+      (1..NUM_CLIENTS).map do |n|
+        Thread.new do
+          Qotd::Client.make_requests(
+            config: config,
+            request: "GET quote linus\r\n",
+            num_requests: NUM_REQUESTS
+          ) { |response| queue.push(response) if VERBOSE }
+        end
+      end.each(&:join)
+    end
+  end
+
+  puts result
+
+  if VERBOSE
+    results = Hash.new(0)
+
+    while !queue.empty? do
+      v = queue.pop
+      results.store(v, results[v]+1)
+    end
+
+    results.each do |k, v|
+      puts "   #{k.split.first[0..30]}: #{v}"
+    end
+  end
+end
+
+puts "Running benchmark with #{NUM_CLIENTS} clients, " \
+     "#{NUM_REQUESTS} requests per client"
+
+bm(config)
+
+exit

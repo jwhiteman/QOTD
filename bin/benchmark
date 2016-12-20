@@ -116,4 +116,12 @@ bm(Qotd::Strategy::Pool) do |config|
   end
 end
 
+bm(Qotd::Strategy::Evented) do |config|
+  config.tap do |config|
+    config.strategy      = Qotd::Strategy::Evented
+    config.verbose       = false
+    config.port          = 10020
+  end
+end
+
 exit

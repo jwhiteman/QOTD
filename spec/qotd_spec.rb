@@ -101,4 +101,12 @@ describe Qotd do
       config.num_threads = 10
     end
   end
+
+  test_strategy(Qotd::Strategy::Evented) do |strategy, config|
+    config.tap do |config|
+      config.strategy = strategy
+      config.verbose  = false
+      config.port     = 10022
+    end
+  end
 end

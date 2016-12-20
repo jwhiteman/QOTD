@@ -17,7 +17,7 @@ module Qotd
 
     socket.bind(address)
 
-    print "listening on #{config.port} (pid #{$$})\n" if config.verbose
+    print "Listening on #{config.port} (pid #{$$})\n" if config.verbose
 
     socket.listen(config.lqueue)
 

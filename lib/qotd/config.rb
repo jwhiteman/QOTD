@@ -2,7 +2,7 @@ require "ostruct"
 
 module Qotd
   CONFIG = OpenStruct.new({
-    strategy:      Qotd::Strategy::Serial,
+    strategy:      Qotd::Strategy::Evented,
     port:          10017,
     host:          "127.0.0.1",
     lqueue:        5,

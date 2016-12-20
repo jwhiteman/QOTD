@@ -1,6 +1,69 @@
 #!/usr/bin/env ruby
 
 require "bundler/setup"
+require "ostruct"
+require "optparse"
 require "qotd"
 
-Qotd.start(config: Qotd::CONFIG)
+def parse_strategy(strategy)
+  case strategy
+  when /pool/i then Qotd::Strategy::Pool
+  when /prefork/i then Qotd::Strategy::Prefork
+  when /process_per_request/i then Qotd::Strategy::ProcessPerRequest
+  when /thread_per_request/i then Qotd::Strategy::ThreadPerRequest
+  when /evented/i then Qotd::Strategy::Evented
+  when /serial/i then Qotd::Strategy::Serial
+  else
+    puts "Invalid strategy. Use pool, prefork, process_per_request, " \
+         "thread_per_request, evented, or serial"
+    exit 1
+  end
+end
+
+config = Qotd::CONFIG.dup
+
+OptionParser.new do |opts|
+  opts.banner = "Usage: bin/server [options]"
+
+  opts.on("-s", "--strategy STRATEGY", "Strategy to be used") do |strategy|
+    config.strategy = parse_strategy(strategy)
+  end
+
+  opts.on("-p", "--processes PROCESSES", "Number of processes (Prefork only)") do |processes|
+    config.num_processes = processes.to_i
+  end
+
+  opts.on("-P", "--port PORT", "Port to use") do |port|
+    config.port = port.to_i
+  end
+
+  opts.on("-H", "--host HOST", "Host to use") do |host|
+    config.host = host
+  end
+
+  opts.on("-t", "--threads THREADS", "Number of threads (Thread Pool only)") do |threads|
+    config.num_threads = threads.to_i
+  end
+
+  opts.on("-v", "--verbose", "Use verbose output") do |_verbose|
+    config.verbose = true
+  end
+
+  opts.on("-h", "--help", "Prints this help") do
+    puts opts
+
+    exit
+  end
+end.parse!
+
+config.port    ||= 10017
+config.host    ||= "127.0.0.1"
+
+puts "Running #{config.strategy} on #{config.host}:#{config.port}"
+if config.strategy == Qotd::Strategy::Prefork
+  puts "Using #{config.num_processes} processes for Prefork setup"
+elsif config.strategy == Qotd::Strategy::Pool
+  puts "Using #{config.num_threads} processes for ThreadPool setup"
+end
+
+Qotd.start(config: config)

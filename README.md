@@ -13,8 +13,6 @@ There are 6 strategies to choose from, via the config hash:
 Both the process-per-request and thread-per-request are not using any limiting at all, so both will grow without bound if enough
 concurrent requests come in.
 
-If you want to hack around with this, you can checkout the `bin/benchmark` file.
-
 ## Usage
 
 ```

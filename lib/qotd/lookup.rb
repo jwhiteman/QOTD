@@ -6,7 +6,7 @@ module Qotd
       Qotd::QUOTES
     end
 
-    def quote_of_the_day(author_id: author_id)
+    def quote_of_the_day(author_id:)
       begin
         quotes[author_id.to_sym][_index_for_today]
       rescue

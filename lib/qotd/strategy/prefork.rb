@@ -4,14 +4,14 @@ module Qotd
       attr_reader :socket, :config, :master
       attr_accessor :workers
 
-      def initialize(socket: socket, config: config)
+      def initialize(socket:, config:)
         @socket  = socket
         @config  = config
         @master  = $$
         @workers = []
       end
 
-      def self.run(socket: socket, config: config)
+      def self.run(socket:, config:)
         new(socket: socket, config: config).run
       end
 

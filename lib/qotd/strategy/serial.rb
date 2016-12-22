@@ -3,12 +3,12 @@ module Qotd
     class Serial
       attr_reader :socket, :config
 
-      def initialize(socket: socket, config: config)
+      def initialize(socket:, config:)
         @socket = socket
         @config = config
       end
 
-      def self.run(socket: socket, config: config)
+      def self.run(socket:, config:)
         new(socket: socket, config: config).run
       end
 

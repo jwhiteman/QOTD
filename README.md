@@ -2,7 +2,7 @@
 
 This is a just-for-fun [Quote of the Day Server](https://en.wikipedia.org/wiki/QOTD), in Ruby.
 
-There are 6 strategies to choose from, via the config hash:
+There are 6 modes to choose from, via the config hash:
 - evented
 - thread pool
 - prefork
@@ -10,8 +10,7 @@ There are 6 strategies to choose from, via the config hash:
 - thread-per-request
 - serial
 
-Both the process-per-request and thread-per-request are not using any limiting at all, so both will grow without bound if enough
-concurrent requests come in.
+Both the process-per-request and thread-per-request are not using any limiting at all, so both will grow without bound if enough concurrent requests come in.
 
 ## Usage
 
